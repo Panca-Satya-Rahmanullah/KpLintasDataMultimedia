@@ -94,7 +94,7 @@ function PelangganPage({ socket }) {
     setFormError('');
     setEditMode(false);
     setEditId(null);
-    fetchPppoeSecrets(); // reload secrets on modal open
+    fetchPppoeSecrets();
     setShowModal(true);
   }
 
@@ -111,7 +111,7 @@ function PelangganPage({ socket }) {
     setFormError('');
     setEditMode(true);
     setEditId(item.id_pelanggan);
-    fetchPppoeSecrets(); // reload secrets on modal open
+    fetchPppoeSecrets();
     setShowModal(true);
   }
 
@@ -152,7 +152,6 @@ function PelangganPage({ socket }) {
     }
   }
 
-  // Filter pelanggan berdasarkan search
   var filteredPelanggan = pelanggan.filter(function(item) {
     if (!searchQuery) return true;
     var q = searchQuery.toLowerCase();
@@ -169,6 +168,37 @@ function PelangganPage({ socket }) {
     if (!dateStr) return '-';
     var d = new Date(dateStr);
     return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  // FUNGSI BARU: Penentu Status Dinamis
+  function hitungStatusDinamis(dueDate, pppoeStatus) {
+    // 1. Cek jika internet mati / PPPoE offline (menimpa semua status tanggal)
+    if (pppoeStatus === 'inactive' || pppoeStatus === 'offline' || pppoeStatus === false) {
+      return 'abu_abu';
+    }
+
+    if (!dueDate) return 'abu_abu'; // Jika belum diset tanggalnya
+
+    // 2. Ambil tanggal hari ini, set jam ke 00:00 agar hitungan murni beda hari
+    var hariIni = new Date();
+    hariIni.setHours(0, 0, 0, 0);
+
+    // 3. Ambil tanggal jatuh tempo
+    var tanggalJT = new Date(dueDate);
+    tanggalJT.setHours(0, 0, 0, 0);
+
+    // 4. Hitung selisih
+    var selisihWaktu = tanggalJT.getTime() - hariIni.getTime();
+    var selisihHari = Math.ceil(selisihWaktu / (1000 * 60 * 60 * 24));
+
+    // 5. Kembalikan key yang sesuai dengan data di StatusBadge.js
+    if (selisihHari < 0) {
+      return 'merah';      // Sudah lewat jatuh tempo
+    } else if (selisihHari >= 0 && selisihHari <= 3) {
+      return 'kuning';     // H-3 sampai hari H
+    } else {
+      return 'hijau';      // Masih di atas 3 hari (Aman/Lunas)
+    }
   }
 
   return (
@@ -237,6 +267,9 @@ function PelangganPage({ socket }) {
             </thead>
             <tbody>
               {filteredPelanggan.map(function(item, idx) {
+                // MEMANGGIL FUNGSI DINAMIS DI SINI
+                var statusTabel = hitungStatusDinamis(item.due_date, item.pppoe_status);
+
                 return (
                   <tr key={item.id_pelanggan}>
                     <td style={{ color: 'var(--text-muted)' }}>{idx + 1}</td>
@@ -283,7 +316,10 @@ function PelangganPage({ socket }) {
                       )}
                     </td>
                     <td>{formatTanggal(item.due_date)}</td>
-                    <td><StatusBadge status={item.status_tagihan} /></td>
+                    
+                    {/* IMPLEMENTASI STATUS KE COMPONENT STATUS BADGE */}
+                    <td><StatusBadge status={statusTabel} /></td>
+                    
                     <td>
                       <div className="table-actions">
                         <button 
