@@ -37,7 +37,7 @@ var Pembayaran = {
     var sql = `
       UPDATE pembayaran 
       SET status = ?, alasan_tolak = ?, id_admin = ?, verified_at = NOW() 
-      WHERE id_pembayaran = ?
+      WHERE id_pembayaran = ? AND status = 'pending'
     `;
     var values = [
       data.status, // 'diterima' atau 'ditolak'

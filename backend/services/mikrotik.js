@@ -1,12 +1,16 @@
 var RouterOSAPI = require('node-routeros').RouterOSAPI;
 
-var host = process.env.MIKROTIK_HOST || '192.168.50.1';
-var user = process.env.MIKROTIK_USER || 'api_isp';
-var pass = process.env.MIKROTIK_PASS || '190925Da';
+var host = process.env.MIKROTIK_HOST;
+var user = process.env.MIKROTIK_USER;
+var pass = process.env.MIKROTIK_PASS;
 var port = parseInt(process.env.MIKROTIK_PORT || '8728', 10);
 
 // Helper function to establish connection, write command, close connection, and return data
 async function executeCommand(command, params) {
+  if (!host || !user || !pass) {
+    throw new Error('Kredensial Mikrotik belum dikonfigurasi di file .env');
+  }
+
   var conn = new RouterOSAPI({
     host: host,
     user: user,

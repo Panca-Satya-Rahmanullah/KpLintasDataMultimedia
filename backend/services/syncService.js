@@ -3,6 +3,7 @@ var Pelanggan = require('../models/Pelanggan');
 var SocketService = require('./socket');
 
 var syncInterval = null;
+var isSyncing = false;
 
 var SyncService = {
   start: function() {
@@ -26,6 +27,12 @@ var SyncService = {
   },
 
   sync: async function() {
+    if (isSyncing) {
+      console.log('[Sync Service] Sync is already in progress. Skipping.');
+      return;
+    }
+    isSyncing = true;
+
     try {
       // 1. Check router health
       var pingRes = await MikrotikService.ping();
@@ -41,58 +48,73 @@ var SyncService = {
       var activeUsernames = new Set(activeConns.map(conn => conn.name));
 
       // 3. Fetch all customers from DB
-      Pelanggan.getAll(function(err, customers) {
-        if (err) {
-          console.error('Error fetching customers for sync:', err.message);
-          return;
-        }
-
-        var registeredPppoe = new Set();
-
-        customers.forEach(function(cust) {
-          if (!cust.pppoe_username) return;
-          
-          registeredPppoe.add(cust.pppoe_username);
-          var isCurrentlyActive = activeUsernames.has(cust.pppoe_username);
-          var newStatus = isCurrentlyActive ? 'active' : 'inactive';
-
-          // If status changed in DB
-          if (cust.pppoe_status !== newStatus) {
-            Pelanggan.update(cust.id_pelanggan, { pppoe_status: newStatus }, function(updateErr) {
-              if (updateErr) {
-                console.error(`Failed to update pppoe status for ${cust.nama}:`, updateErr.message);
-                return;
-              }
-              console.log(`Updated status of PPPoE user "${cust.pppoe_username}" (${cust.nama}) to ${newStatus}`);
-              
-              // Broadcast change via Socket.IO
-              SocketService.broadcast('pelanggan_updated', {
-                id_pelanggan: cust.id_pelanggan,
-                pppoe_status: newStatus
-              });
-            });
+      await new Promise((resolve) => {
+        Pelanggan.getAll(function(err, customers) {
+          if (err) {
+            console.error('Error fetching customers for sync:', err.message);
+            resolve();
+            return;
           }
-        });
 
-        // 4. Find unregistered PPPoE active connections (Tahap 2)
-        var unregistered = activeConns.filter(function(conn) {
-          return !registeredPppoe.has(conn.name);
-        });
+          var registeredPppoe = new Set();
+          var updatePromises = [];
 
-        if (unregistered.length > 0) {
-          console.log(`Detected ${unregistered.length} unregistered active PPPoE connection(s) on router.`);
-        }
+          customers.forEach(function(cust) {
+            if (!cust.pppoe_username) return;
+            
+            registeredPppoe.add(cust.pppoe_username);
+            var isCurrentlyActive = activeUsernames.has(cust.pppoe_username);
+            var newStatus = isCurrentlyActive ? 'active' : 'inactive';
 
-        // Broadcast current active status summary to frontend
-        SocketService.broadcast('pppoe_summary', {
-          active_count: activeConns.length,
-          unregistered_count: unregistered.length,
-          unregistered_list: unregistered
+            // If status changed in DB
+            if (cust.pppoe_status !== newStatus) {
+              var updatePromise = new Promise((resolveUpdate) => {
+                Pelanggan.update(cust.id_pelanggan, { pppoe_status: newStatus }, function(updateErr) {
+                  if (updateErr) {
+                    console.error(`Failed to update pppoe status for ${cust.nama}:`, updateErr.message);
+                  } else {
+                    console.log(`Updated status of PPPoE user "${cust.pppoe_username}" (${cust.nama}) to ${newStatus}`);
+                    
+                    // Broadcast change via Socket.IO
+                    SocketService.broadcast('pelanggan_updated', {
+                      id_pelanggan: cust.id_pelanggan,
+                      pppoe_status: newStatus
+                    });
+                  }
+                  resolveUpdate();
+                });
+              });
+              updatePromises.push(updatePromise);
+            }
+          });
+
+          // Wait for all database updates to complete before wrapping up this sync cycle
+          Promise.all(updatePromises).then(() => {
+            // 4. Find unregistered PPPoE active connections (Tahap 2)
+            var unregistered = activeConns.filter(function(conn) {
+              return !registeredPppoe.has(conn.name);
+            });
+
+            if (unregistered.length > 0) {
+              console.log(`Detected ${unregistered.length} unregistered active PPPoE connection(s) on router.`);
+            }
+
+            // Broadcast current active status summary to frontend
+            SocketService.broadcast('pppoe_summary', {
+              active_count: activeConns.length,
+              unregistered_count: unregistered.length,
+              unregistered_list: unregistered
+            });
+
+            resolve();
+          });
         });
       });
 
     } catch (err) {
       console.error('Error in Sync Service execution:', err.message);
+    } finally {
+      isSyncing = false;
     }
   }
 };

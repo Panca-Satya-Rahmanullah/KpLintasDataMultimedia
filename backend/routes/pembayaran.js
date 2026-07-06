@@ -40,9 +40,13 @@ router.post('/:id/approve', function(req, res) {
       status: 'diterima',
       alasan_tolak: null,
       id_admin: id_admin
-    }, function(verifyErr) {
+    }, function(verifyErr, result) {
       if (verifyErr) {
         return res.status(500).json({ success: false, message: 'Gagal memverifikasi pembayaran.' });
+      }
+
+      if (!result || result.affectedRows === 0) {
+        return res.status(409).json({ success: false, message: 'Pembayaran ini sudah diverifikasi atau ditolak oleh admin lain.' });
       }
 
       // 2. Set tagihan status to 'lunas'
@@ -59,7 +63,7 @@ router.post('/:id/approve', function(req, res) {
         Pelanggan.update(payment.id_pelanggan, { 
           status_tagihan: 'hijau',
           due_date: newDueDateString
-        }, function(pelangganErr) {
+        }, async function(pelangganErr) {
           if (pelangganErr) {
             console.error('Gagal memperbarui status pelanggan:', pelangganErr.message);
           }
@@ -76,10 +80,23 @@ router.post('/:id/approve', function(req, res) {
           }
           var nextPeriod = year + '-' + (month < 10 ? '0' + month : month);
 
+          // Query the customer's current package price to ensure nominal matches their package
+          var db = require('../config/db');
+          var nominal = await new Promise((resolve) => {
+            db.query(`
+              SELECT pl.harga 
+              FROM pelanggan p 
+              JOIN paket_layanan pl ON p.paket = pl.nama_paket 
+              WHERE p.id_pelanggan = ?
+            `, [payment.id_pelanggan], (err, rows) => {
+              resolve(rows && rows[0] ? rows[0].harga : payment.nominal);
+            });
+          });
+
           Tagihan.create({
             id_pelanggan: payment.id_pelanggan,
             periode: nextPeriod,
-            nominal: payment.nominal,
+            nominal: nominal,
             status: 'belum_bayar',
             due_date: newDueDateString
           }, async function(nextBillErr) {
@@ -160,9 +177,13 @@ router.post('/:id/reject', function(req, res) {
       status: 'ditolak',
       alasan_tolak: alasan_tolak,
       id_admin: id_admin
-    }, function(verifyErr) {
+    }, function(verifyErr, result) {
       if (verifyErr) {
         return res.status(500).json({ success: false, message: 'Gagal memperbarui status verifikasi.' });
+      }
+
+      if (!result || result.affectedRows === 0) {
+        return res.status(409).json({ success: false, message: 'Pembayaran ini sudah diverifikasi atau ditolak oleh admin lain.' });
       }
 
       // Calculate if the bill is late or just unpaid
@@ -187,7 +208,7 @@ router.post('/:id/reject', function(req, res) {
           // 4. Send Email notification to customer with rejection reason
           if (payment.email) {
             var nominal = Number(payment.nominal).toLocaleString('id-ID');
-            var paymentUrl = `${process.env.PAYMENT_PORTAL_URL || 'http://localhost:3001/bayar'}`;
+            var paymentUrl = `${process.env.PAYMENT_PORTAL_URL || 'http://localhost:3001/bayar'}/${encodeURIComponent(payment.email)}`;
 
             await EmailService.sendPaymentRejectedEmail(payment.email, {
               nama: payment.nama,
@@ -205,6 +226,10 @@ router.post('/:id/reject', function(req, res) {
             id_pelanggan: payment.id_pelanggan,
             status_tagihan: targetCustomerStatus
           });
+
+          // Trigger billing check immediately in background to update status & send reminder if due
+          var CronService = require('../services/cronService');
+          CronService.checkAndSendReminders();
 
           res.json({
             success: true,

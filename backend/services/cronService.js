@@ -17,10 +17,16 @@ var CronService = {
   start: function() {
     console.log('Daily Cron Job for billing status & Email reminder initialized.');
     
+    // Run evaluation immediately on startup
+    this.checkAndSendReminders();
+    
     // Schedule to run every day at 07:00 AM
     cron.schedule('0 7 * * *', () => {
       console.log('[Cron Job] Running daily check at 07:00 AM...');
       this.checkAndSendReminders();
+    }, {
+      scheduled: true,
+      timezone: 'Asia/Jakarta'
     });
   },
 
@@ -104,7 +110,7 @@ var CronService = {
       year: 'numeric'
     });
     var periode = bill.periode;
-    var paymentUrl = `${process.env.PAYMENT_PORTAL_URL || 'http://localhost:3001/bayar'}`;
+    var paymentUrl = `${process.env.PAYMENT_PORTAL_URL || 'http://localhost:3001/bayar'}/${encodeURIComponent(email)}`;
 
     // Check if customer has email
     if (!email) {

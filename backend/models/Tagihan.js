@@ -18,7 +18,7 @@ var Tagihan = {
   // Ambil tagihan yang belum dibayar / terlambat
   getUnpaid: function(callback) {
     var sql = `
-      SELECT t.*, p.nama, p.no_hp, p.pppoe_username, p.status_tagihan 
+      SELECT t.*, p.nama, p.no_hp, p.pppoe_username, p.status_tagihan, p.email 
       FROM tagihan t 
       JOIN pelanggan p ON t.id_pelanggan = p.id_pelanggan 
       WHERE t.status IN ('belum_bayar', 'terlambat')

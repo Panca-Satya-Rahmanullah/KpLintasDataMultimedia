@@ -12,8 +12,21 @@ var SocketService = {
       }
     });
 
+    var jwt = require('jsonwebtoken');
+
     io.on('connection', function(socket) {
       console.log('Client connected to WebSocket:', socket.id);
+      
+      // Join admin room if valid admin token is provided
+      var token = socket.handshake.auth?.token || socket.handshake.query?.token;
+      if (token) {
+        jwt.verify(token, process.env.JWT_SECRET, function(err, decoded) {
+          if (!err && decoded && decoded.id) {
+            socket.join('admin');
+            console.log(`Socket ${socket.id} joined 'admin' room`);
+          }
+        });
+      }
       
       socket.on('disconnect', function() {
         console.log('Client disconnected from WebSocket:', socket.id);
@@ -32,7 +45,7 @@ var SocketService = {
 
   broadcast: function(event, data) {
     if (io) {
-      io.emit(event, data);
+      io.to('admin').emit(event, data);
     }
   }
 };

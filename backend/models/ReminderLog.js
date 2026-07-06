@@ -41,6 +41,24 @@ var ReminderLog = {
       if (err) return callback(err, null);
       callback(null, results[0].total > 0);
     });
+  },
+
+  // Hapus log tertentu
+  delete: function(id_reminder, callback) {
+    var sql = 'DELETE FROM reminder_log WHERE id_reminder = ?';
+    db.query(sql, [id_reminder], function(err, result) {
+      if (err) return callback(err, null);
+      callback(null, result);
+    });
+  },
+
+  // Hapus semua log
+  clearAll: function(callback) {
+    var sql = 'DELETE FROM reminder_log';
+    db.query(sql, function(err, result) {
+      if (err) return callback(err, null);
+      callback(null, result);
+    });
   }
 };
 

@@ -5,13 +5,28 @@ var Pelanggan = require('../models/Pelanggan');
 var Otp = require('../models/Otp');
 var EmailService = require('../services/emailService');
 
+var rateLimit = require('express-rate-limit');
+
+var otpLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000, // 5 menit
+  max: 3, // Maksimal 3 permintaan per IP/Window
+  message: {
+    success: false,
+    message: 'Terlalu banyak permintaan OTP. Silakan coba lagi dalam 5 menit.'
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 /* POST /api/customer/auth/request-otp - Request OTP via Email */
-router.post('/request-otp', function(req, res) {
+router.post('/request-otp', otpLimiter, function(req, res) {
   var { email } = req.body;
 
   if (!email) {
     return res.status(400).json({ success: false, message: 'Email wajib diisi.' });
   }
+
+  email = email.trim().toLowerCase();
 
   // Search customer by email in database
   var db = require('../config/db');
@@ -69,6 +84,8 @@ router.post('/verify-otp', function(req, res) {
   if (!email || !otp) {
     return res.status(400).json({ success: false, message: 'Email dan OTP wajib diisi.' });
   }
+
+  email = email.trim().toLowerCase();
 
   // Find customer by email
   var db = require('../config/db');

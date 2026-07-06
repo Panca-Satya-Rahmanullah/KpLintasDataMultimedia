@@ -45,8 +45,21 @@ function App() {
     var savedCustToken = localStorage.getItem('customer_token');
     var savedCustInfo = localStorage.getItem('customer_info');
     if (savedCustToken && savedCustInfo) {
-      setCustomerToken(savedCustToken);
-      setCustomer(JSON.parse(savedCustInfo));
+      var custInfo = JSON.parse(savedCustInfo);
+      var pathParts = window.location.pathname.split('/');
+      var emailInUrl = '';
+      if (pathParts[1] === 'bayar' && pathParts[2]) {
+        emailInUrl = decodeURIComponent(pathParts[2]).trim().toLowerCase();
+      }
+      
+      if (emailInUrl && custInfo.email && custInfo.email.trim().toLowerCase() !== emailInUrl) {
+        console.warn('URL specifies different customer email than active session. Logging out.');
+        localStorage.removeItem('customer_token');
+        localStorage.removeItem('customer_info');
+      } else {
+        setCustomerToken(savedCustToken);
+        setCustomer(custInfo);
+      }
     }
 
     setLoading(false);
@@ -144,7 +157,7 @@ function App() {
     if (!customer || !customerToken) {
       return (
         <Routes>
-          <Route path="/bayar/:phone" element={<CustomerLoginPage onLogin={handleCustomerLogin} />} />
+          <Route path="/bayar/:userEmail" element={<CustomerLoginPage onLogin={handleCustomerLogin} />} />
           <Route path="/bayar" element={<CustomerLoginPage onLogin={handleCustomerLogin} />} />
           <Route path="*" element={<Navigate to="/bayar" replace />} />
         </Routes>

@@ -42,6 +42,28 @@ function ReminderLogPage() {
     }
   }
 
+  async function handleDeleteLog(id) {
+    if (!window.confirm('Apakah Anda yakin ingin menghapus log reminder ini?')) return;
+    try {
+      var response = await axios.delete('http://localhost:3000/api/reminder/logs/' + id, { headers: headers });
+      alert(response.data.message);
+      fetchLogs();
+    } catch (err) {
+      alert('Gagal menghapus log: ' + (err.response?.data?.message || err.message));
+    }
+  }
+
+  async function handleClearAllLogs() {
+    if (!window.confirm('Apakah Anda yakin ingin menghapus SEMUA log reminder?')) return;
+    try {
+      var response = await axios.delete('http://localhost:3000/api/reminder/logs', { headers: headers });
+      alert(response.data.message);
+      fetchLogs();
+    } catch (err) {
+      alert('Gagal membersihkan log: ' + (err.response?.data?.message || err.message));
+    }
+  }
+
   // Filter logs by search query
   var filteredLogs = logs.filter(function(log) {
     if (!searchQuery) return true;
@@ -72,13 +94,21 @@ function ReminderLogPage() {
           <h1>Log Reminder Email</h1>
           <p>Riwayat pengiriman notifikasi reminder jatuh tempo via Email ke pelanggan.</p>
         </div>
-        <button 
-          className="btn btn-primary" 
-          onClick={handleTriggerCron} 
-          disabled={triggering}
-        >
-          <TemplateIcon name="refresh" size={16} style={{ marginRight: '6px' }} /> {triggering ? 'Memproses...' : 'Kirim Reminder Sekarang'}
-        </button>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button 
+            className="btn btn-danger" 
+            onClick={handleClearAllLogs}
+          >
+            <TemplateIcon name="trash" size={16} style={{ marginRight: '6px' }} /> Bersihkan Semua Log
+          </button>
+          <button 
+            className="btn btn-primary" 
+            onClick={handleTriggerCron} 
+            disabled={triggering}
+          >
+            <TemplateIcon name="refresh" size={16} style={{ marginRight: '6px' }} /> {triggering ? 'Memproses...' : 'Kirim Reminder Sekarang'}
+          </button>
+        </div>
       </div>
 
       <div className="table-container animate-fadeIn">
@@ -123,6 +153,7 @@ function ReminderLogPage() {
                 <th>Waktu Kirim</th>
                 <th>Status</th>
                 <th>Pesan</th>
+                <th>Aksi</th>
               </tr>
             </thead>
             <tbody>
@@ -145,6 +176,15 @@ function ReminderLogPage() {
                         onClick={function() { setMessageModal(log.pesan); }}
                       >
                         <TemplateIcon name="document" size={14} style={{ marginRight: '6px' }} /> Lihat Isi Pesan
+                      </button>
+                    </td>
+                    <td>
+                      <button 
+                        className="btn btn-danger btn-sm"
+                        onClick={function() { handleDeleteLog(log.id_reminder); }}
+                        title="Hapus Log"
+                      >
+                        <TemplateIcon name="trash" size={14} />
                       </button>
                     </td>
                   </tr>

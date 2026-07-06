@@ -1,23 +1,29 @@
 var nodemailer = require('nodemailer');
 
-// Create reusable transporter using Gmail SMTP
-var transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
+// Create reusable transporter using Gmail SMTP if credentials are configured
+var transporter = null;
 
-// Verify transporter on startup
-transporter.verify(function(error) {
-  if (error) {
-    console.error('[Email Service] ⚠️  Gagal terhubung ke SMTP Gmail:', error.message);
-    console.log('[Email Service] Email akan berjalan dalam mode SANDBOX (log ke console).');
-  } else {
-    console.log('[Email Service] ✅ SMTP Gmail terhubung dan siap mengirim email.');
-  }
-});
+if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+  transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS
+    }
+  });
+
+  // Verify transporter on startup
+  transporter.verify(function(error) {
+    if (error) {
+      console.error('[Email Service] ⚠️  Gagal terhubung ke SMTP Gmail:', error.message);
+      console.log('[Email Service] Email akan berjalan dalam mode SANDBOX (log ke console).');
+    } else {
+      console.log('[Email Service] ✅ SMTP Gmail terhubung dan siap mengirim email.');
+    }
+  });
+} else {
+  console.log('[Email Service] ⚠️  EMAIL_USER/EMAIL_PASS tidak terkonfigurasi. Email berjalan dalam mode SANDBOX (log ke console).');
+}
 
 var EmailService = {
   /**
@@ -32,7 +38,7 @@ var EmailService = {
     console.log('[Email Service] Menyiapkan email ke ' + toEmail + ' | Subject: ' + subject);
 
     // Sandbox mode if credentials are missing
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    if (!transporter) {
       console.log('========================================================');
       console.log('⚠️  EMAIL_USER/EMAIL_PASS tidak terkonfigurasi. Mode SANDBOX.');
       console.log('Tujuan: ' + toEmail);

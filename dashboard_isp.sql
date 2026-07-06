@@ -52,7 +52,8 @@ INSERT INTO `admin` (`id_admin`, `nama`, `username`, `password_hash`, `role`, `c
 
 CREATE TABLE `customer_otp` (
   `id` int NOT NULL,
-  `no_hp` varchar(20) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `no_hp` varchar(20) DEFAULT NULL,
   `otp` varchar(6) NOT NULL,
   `expires_at` datetime NOT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
@@ -273,6 +274,7 @@ ALTER TABLE `pelanggan`
   ADD PRIMARY KEY (`id_pelanggan`),
   ADD UNIQUE KEY `uq_pelanggan_no_hp` (`no_hp`),
   ADD UNIQUE KEY `uq_pelanggan_pppoe` (`pppoe_username`),
+  ADD UNIQUE KEY `uq_pelanggan_email` (`email`),
   ADD KEY `idx_pelanggan_no_hp` (`no_hp`),
   ADD KEY `idx_pelanggan_pppoe` (`pppoe_username`),
   ADD KEY `idx_pelanggan_status` (`status_tagihan`);

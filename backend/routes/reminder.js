@@ -42,4 +42,25 @@ router.post('/trigger-cron', async function(req, res) {
   }
 });
 
+/* DELETE /api/reminder/logs/:id - Delete a specific reminder log */
+router.delete('/logs/:id', function(req, res) {
+  var id = req.params.id;
+  ReminderLog.delete(id, function(err, result) {
+    if (err) {
+      return res.status(500).json({ success: false, message: 'Gagal menghapus log reminder', error: err.message });
+    }
+    res.json({ success: true, message: 'Log reminder berhasil dihapus.' });
+  });
+});
+
+/* DELETE /api/reminder/logs - Clear all reminder logs */
+router.delete('/logs', function(req, res) {
+  ReminderLog.clearAll(function(err, result) {
+    if (err) {
+      return res.status(500).json({ success: false, message: 'Gagal membersihkan log reminder', error: err.message });
+    }
+    res.json({ success: true, message: 'Semua log reminder berhasil dibersihkan.' });
+  });
+});
+
 module.exports = router;

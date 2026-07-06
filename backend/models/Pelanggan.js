@@ -105,6 +105,15 @@ var Pelanggan = {
     });
   },
 
+  // Cari berdasarkan PPPoE Username
+  findByPppoe: function(username, callback) {
+    var sql = 'SELECT * FROM pelanggan WHERE pppoe_username = ?';
+    db.query(sql, [username], function(err, results) {
+      if (err) return callback(err, null);
+      callback(null, results[0] || null);
+    });
+  },
+
   // Hitung jumlah pelanggan per status
   countByStatus: function(callback) {
     var sql = 'SELECT status_tagihan, COUNT(*) as total FROM pelanggan GROUP BY status_tagihan';

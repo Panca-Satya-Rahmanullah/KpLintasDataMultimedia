@@ -4,6 +4,7 @@ import TemplateIcon from '../components/TemplateIcon';
 
 function CustomerPortalPage({ onLogout }) {
   var [billing, setBilling] = useState(null);
+  var [lastPayment, setLastPayment] = useState(null);
   var [loading, setLoading] = useState(true);
   var [file, setFile] = useState(null);
   var [preview, setPreview] = useState('');
@@ -22,6 +23,7 @@ function CustomerPortalPage({ onLogout }) {
       var response = await axios.get('http://localhost:3000/api/customer/portal/billing', { headers: headers });
       if (response.data.success) {
         setBilling(response.data.data);
+        setLastPayment(response.data.lastPayment);
       }
     } catch (err) {
       console.error('Gagal mengambil data tagihan:', err);
@@ -99,6 +101,17 @@ function CustomerPortalPage({ onLogout }) {
         {message.text && (
           <div className={message.type === 'success' ? 'status-badge hijau' : 'login-error'} style={{ width: '100%', padding: '12px', borderRadius: '8px', marginBottom: '16px', display: 'block', textAlign: 'center' }}>
             {message.type === 'success' ? <TemplateIcon name="check" size={16} /> : <TemplateIcon name="alert" size={16} />} <span style={{ marginLeft: '8px' }}>{message.text}</span>
+          </div>
+        )}
+
+
+
+        {lastPayment && lastPayment.status === 'ditolak' && (
+          <div className="login-error animate-fadeIn" style={{ width: '100%', padding: '16px', borderRadius: '8px', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', fontSize: '0.88rem' }}>
+            <TemplateIcon name="alert" size={18} color="var(--text-danger)" />
+            <div style={{ textAlign: 'left' }}>
+              <strong>Pembayaran Ditolak Admin!</strong> Bukti pembayaran periode <strong>{lastPayment.periode}</strong> ditolak. <br/>Alasan: <em>"{lastPayment.alasan_tolak}"</em>. Silakan upload ulang bukti pembayaran yang valid.
+            </div>
           </div>
         )}
 

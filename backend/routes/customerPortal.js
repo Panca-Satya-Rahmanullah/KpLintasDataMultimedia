@@ -43,6 +43,28 @@ var upload = multer({
 router.get('/billing', function(req, res) {
   var id_pelanggan = req.customerId;
 
+  function sendBillingResponse(billingData) {
+    var lastPaymentSql = `
+      SELECT pem.*, t.periode, t.nominal 
+      FROM pembayaran pem 
+      JOIN tagihan t ON pem.id_tagihan = t.id_tagihan 
+      WHERE t.id_pelanggan = ? 
+      ORDER BY pem.tanggal_upload DESC 
+      LIMIT 1
+    `;
+    db.query(lastPaymentSql, [id_pelanggan], function(payErr, payResults) {
+      var lastPayment = null;
+      if (!payErr && payResults && payResults[0]) {
+        lastPayment = payResults[0];
+      }
+      res.json({
+        success: true,
+        data: billingData,
+        lastPayment: lastPayment
+      });
+    });
+  }
+
   var sql = `
     SELECT t.*, p.nama, p.paket, p.status_tagihan 
     FROM tagihan t 
@@ -58,18 +80,68 @@ router.get('/billing', function(req, res) {
     }
 
     if (results.length === 0) {
-      // No active/unpaid bills
-      return res.json({
-        success: true,
-        data: null,
-        message: 'Semua tagihan Anda lunas. Terima kasih!'
+      // Check if we need to generate the first/missing tagihan for their current due_date
+      var checkCustSql = `
+        SELECT p.*, pl.harga 
+        FROM pelanggan p
+        LEFT JOIN paket_layanan pl ON p.paket = pl.nama_paket
+        WHERE p.id_pelanggan = ?
+      `;
+      db.query(checkCustSql, [id_pelanggan], function(custErr, custResults) {
+        if (custErr || custResults.length === 0) {
+          return sendBillingResponse(null);
+        }
+
+        var customer = custResults[0];
+        if (!customer.due_date || !customer.harga) {
+          return sendBillingResponse(null);
+        }
+
+        // Format due_date to YYYY-MM period
+        var d = new Date(customer.due_date);
+        var year = d.getFullYear();
+        var month = d.getMonth() + 1;
+        var period = year + '-' + (month < 10 ? '0' + month : month);
+
+        // Check if a bill for this period already exists
+        var checkBillSql = 'SELECT * FROM tagihan WHERE id_pelanggan = ? AND periode = ?';
+        db.query(checkBillSql, [id_pelanggan, period], function(billErr, billResults) {
+          if (billErr || billResults.length > 0) {
+            return sendBillingResponse(null);
+          }
+
+          console.log(`[Billing Service] Generating missing bill for customer ${customer.nama} (${period})`);
+          var Tagihan = require('../models/Tagihan');
+          Tagihan.create({
+            id_pelanggan: id_pelanggan,
+            periode: period,
+            nominal: customer.harga,
+            status: 'belum_bayar',
+            due_date: customer.due_date
+          }, function(createBillErr, newBill) {
+            if (createBillErr) {
+              console.error('[Billing Service] Failed to generate bill:', createBillErr.message);
+              return res.status(500).json({ success: false, message: 'Gagal membuat tagihan otomatis', error: createBillErr.message });
+            }
+
+            sendBillingResponse({
+              id_tagihan: newBill.id_tagihan,
+              id_pelanggan: id_pelanggan,
+              periode: period,
+              nominal: customer.harga,
+              status: 'belum_bayar',
+              due_date: customer.due_date,
+              nama: customer.nama,
+              paket: customer.paket,
+              status_tagihan: customer.status_tagihan
+            });
+          });
+        });
       });
+      return;
     }
 
-    res.json({
-      success: true,
-      data: results[0]
-    });
+    sendBillingResponse(results[0]);
   });
 });
 
@@ -99,7 +171,24 @@ router.post('/pay', function(req, res) {
       }
 
       if (results.length === 0) {
+        if (req.file) {
+          fs.unlink(req.file.path, () => {});
+        }
         return res.status(403).json({ success: false, message: 'Akses ditolak. Tagihan bukan milik Anda.' });
+      }
+
+      var tagihan = results[0];
+      if (tagihan.status === 'lunas') {
+        if (req.file) {
+          fs.unlink(req.file.path, () => {});
+        }
+        return res.status(400).json({ success: false, message: 'Tagihan ini sudah lunas.' });
+      }
+      if (tagihan.status === 'menunggu_verifikasi') {
+        if (req.file) {
+          fs.unlink(req.file.path, () => {});
+        }
+        return res.status(400).json({ success: false, message: 'Pembayaran untuk tagihan ini sedang menunggu verifikasi admin.' });
       }
 
       var relativePath = '/uploads/bukti/' + req.file.filename;

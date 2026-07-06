@@ -21,7 +21,7 @@ function verifyCustomerToken(req, res, next) {
     }
     
     req.customerId = decoded.id_pelanggan;
-    req.customerPhone = decoded.no_hp;
+    req.customerEmail = decoded.email;
     next();
   });
 }
