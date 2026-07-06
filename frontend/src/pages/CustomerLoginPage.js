@@ -69,7 +69,7 @@ function CustomerLoginPage({ onLogin }) {
 
           {error && <div className="login-error"><TemplateIcon name="alert" size={16} style={{ marginRight: '6px' }} /> {error}</div>}
           {successMsg && !error && (
-            <div className="status-badge hijau" style={{ width: '100%', padding: '10px', borderRadius: '8px', marginBottom: '16px', display: 'block', textAlign: 'center' }}>
+            <div className="status-badge hijau" style={{ width: '100%', padding: '10px', borderRadius: '5px', marginBottom: '16px', display: 'block', textAlign: 'center' }}>
               {successMsg}
             </div>
           )}

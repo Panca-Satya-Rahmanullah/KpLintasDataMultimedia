@@ -172,7 +172,7 @@ function LaporanPage() {
             type="month"
             value={periode}
             onChange={function (e) { setPeriode(e.target.value); }}
-            style={{ width: '160px', padding: '10px', fontSize: '0.9rem', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
+            style={{ width: '160px', padding: '10px', fontSize: '0.9rem', borderRadius: '5px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
           />
           <button className="btn btn-primary" onClick={handleExportExcel} disabled={loading}>
             <TemplateIcon name="document" size={16} style={{ marginRight: '6px' }} /> Export Excel

@@ -203,7 +203,7 @@ function ReminderLogPage() {
               <h2>Isi Pesan Email</h2>
               <button className="modal-close" onClick={function () { setMessageModal(null); }}><TemplateIcon name="close" size={16} /></button>
             </div>
-            <div className="modal-body" style={{ whiteSpace: 'pre-line', fontFamily: 'monospace', background: 'var(--bg-secondary)', padding: '20px', borderRadius: '8px', margin: '20px', border: '1px solid var(--border-color)' }}>
+            <div className="modal-body" style={{ whiteSpace: 'pre-line', fontFamily: 'monospace', background: 'var(--bg-secondary)', padding: '20px', borderRadius: '5px', margin: '20px', border: '1px solid var(--border-color)' }}>
               {messageModal}
             </div>
             <div className="modal-footer">

@@ -99,7 +99,7 @@ function CustomerPortalPage({ onLogout }) {
         </div>
 
         {message.text && (
-          <div className={message.type === 'success' ? 'status-badge hijau' : 'login-error'} style={{ width: '100%', padding: '12px', borderRadius: '8px', marginBottom: '16px', display: 'block', textAlign: 'center' }}>
+          <div className={message.type === 'success' ? 'status-badge hijau' : 'login-error'} style={{ width: '100%', padding: '12px', borderRadius: '5px', marginBottom: '16px', display: 'block', textAlign: 'center' }}>
             {message.type === 'success' ? <TemplateIcon name="check" size={16} /> : <TemplateIcon name="alert" size={16} />} <span style={{ marginLeft: '8px' }}>{message.text}</span>
           </div>
         )}
@@ -107,7 +107,7 @@ function CustomerPortalPage({ onLogout }) {
 
 
         {lastPayment && lastPayment.status === 'ditolak' && (
-          <div className="login-error animate-fadeIn" style={{ width: '100%', padding: '16px', borderRadius: '8px', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', fontSize: '0.88rem' }}>
+          <div className="login-error animate-fadeIn" style={{ width: '100%', padding: '16px', borderRadius: '5px', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', fontSize: '0.88rem' }}>
             <TemplateIcon name="alert" size={18} color="var(--text-danger)" />
             <div style={{ textAlign: 'left' }}>
               <strong>Pembayaran Ditolak Admin!</strong> Bukti pembayaran periode <strong>{lastPayment.periode}</strong> ditolak. <br />Alasan: <em>"{lastPayment.alasan_tolak}"</em>. Silakan upload ulang bukti pembayaran yang valid.
@@ -150,7 +150,7 @@ function CustomerPortalPage({ onLogout }) {
                 <h3 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '16px' }}><TemplateIcon name="money" size={18} style={{ marginRight: '8px' }} /> Cara Pembayaran</h3>
 
                 {/* Bank Transfer */}
-                <div style={{ background: 'var(--bg-secondary)', padding: '14px', borderRadius: '8px', border: '1px solid var(--border-color)', marginBottom: '16px' }}>
+                <div style={{ background: 'var(--bg-secondary)', padding: '14px', borderRadius: '5px', border: '1px solid var(--border-color)', marginBottom: '16px' }}>
                   <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>Transfer Bank Mandiri</div>
                   <div style={{ fontSize: '1.15rem', fontWeight: 800, margin: '4px 0', color: 'var(--primary-light)' }}>131-00-1572912-3</div>
                   <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>a/n ESP Lintas Data Multimedia</div>
@@ -159,7 +159,7 @@ function CustomerPortalPage({ onLogout }) {
                 {/* QRIS */}
                 <div style={{ textAlign: 'center', marginTop: '16px' }}>
                   <div style={{ fontSize: '0.85rem', fontWeight: 600, marginBottom: '12px' }}>Atau Scan Kode QRIS di bawah:</div>
-                  <div style={{ display: 'inline-block', padding: '10px', background: 'white', borderRadius: '12px', marginBottom: '8px' }}>
+                  <div style={{ display: 'inline-block', padding: '10px', background: 'white', borderRadius: '5px', marginBottom: '8px' }}>
                     <img
                       src="http://localhost:3000/images/qris.png"
                       alt="QRIS ESP Lintas Data"
@@ -188,7 +188,7 @@ function CustomerPortalPage({ onLogout }) {
               ) : (
                 <form onSubmit={handleUpload}>
                   <div className="form-group" style={{ marginBottom: '16px' }}>
-                    <label style={{ display: 'block', padding: '16px', background: 'var(--bg-secondary)', border: '1px dashed var(--border-color-light)', borderRadius: '8px', textAlign: 'center', cursor: 'pointer' }}>
+                    <label style={{ display: 'block', padding: '16px', background: 'var(--bg-secondary)', border: '1px dashed var(--border-color-light)', borderRadius: '5px', textAlign: 'center', cursor: 'pointer' }}>
                       <span style={{ fontSize: '1.5rem', display: 'block', marginBottom: '4px' }}><TemplateIcon name="camera" size={28} /></span>
                       <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--primary-light)' }}>
                         {file ? 'Ganti File Gambar' : 'Pilih Foto / Screenshot Bukti'}
@@ -209,7 +209,7 @@ function CustomerPortalPage({ onLogout }) {
                       <img
                         src={preview}
                         alt="Preview Bukti Transfer"
-                        style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '8px', border: '1px solid var(--border-color)' }}
+                        style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '5px', border: '1px solid var(--border-color)' }}
                       />
                     </div>
                   )}

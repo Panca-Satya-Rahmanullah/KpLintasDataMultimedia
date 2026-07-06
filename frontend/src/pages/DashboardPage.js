@@ -355,7 +355,7 @@ function DashboardPage({ socket }) {
           justify-content: center;
           width: 32px;
           height: 32px;
-          border-radius: 10px;
+          border-radius: var(--radius-md);
           background: var(--primary-glow);
           color: var(--primary);
           flex-shrink: 0;
@@ -472,7 +472,7 @@ function DashboardPage({ socket }) {
           position: relative;
           background-image: radial-gradient(var(--border-color-light) 1px, transparent 1px);
           background-size: 20px 20px;
-          border-radius: 10px;
+          border-radius: var(--radius-lg);
           border: 1px solid var(--border-color-light);
         }
 
@@ -504,7 +504,7 @@ function DashboardPage({ socket }) {
           transition: transform 0.2s ease, filter 0.2s ease;
           z-index: 3;
           padding: 8px 6px;
-          border-radius: 16px;
+          border-radius: var(--radius-xl);
           background: rgba(255, 255, 255, 0.72);
           backdrop-filter: blur(4px);
           border: 1px solid rgba(225, 227, 228, 0.8);
@@ -517,7 +517,7 @@ function DashboardPage({ socket }) {
         .node-icon-wrapper {
           width: 68px;
           height: 68px;
-          border-radius: 18px;
+          border-radius: var(--radius-xl);
           background: var(--bg-tertiary);
           border: 2px solid var(--border-color);
           display: flex;

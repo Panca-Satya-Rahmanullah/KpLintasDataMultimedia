@@ -132,7 +132,7 @@ function PembayaranPage({ socket }) {
       </div>
 
       {successMsg && (
-        <div className="status-badge hijau animate-fadeIn" style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem' }}>
+        <div className="status-badge hijau animate-fadeIn" style={{ width: '100%', padding: '12px 16px', borderRadius: '5px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem' }}>
           <TemplateIcon name="bell" size={16} style={{ marginRight: '8px' }} /> {successMsg}
         </div>
       )}
