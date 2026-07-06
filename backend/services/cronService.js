@@ -2,7 +2,7 @@ var cron = require('node-cron');
 var Tagihan = require('../models/Tagihan');
 var Pelanggan = require('../models/Pelanggan');
 var ReminderLog = require('../models/ReminderLog');
-var WhatsAppService = require('./whatsapp');
+var EmailService = require('./emailService');
 var SocketService = require('./socket');
 
 // Helper to calculate difference in days between two dates
@@ -15,10 +15,9 @@ function getDaysDifference(date1, date2) {
 
 var CronService = {
   start: function() {
-    console.log('Daily Cron Job for billing status & WA reminder initialized.');
+    console.log('Daily Cron Job for billing status & Email reminder initialized.');
     
     // Schedule to run every day at 07:00 AM
-    // Schedule format: minute hour day-of-month month day-of-week
     cron.schedule('0 7 * * *', () => {
       console.log('[Cron Job] Running daily check at 07:00 AM...');
       this.checkAndSendReminders();
@@ -44,21 +43,22 @@ var CronService = {
         var daysDiff = getDaysDifference(dueDate, today);
         
         var newStatus = 'hijau';
-        var shouldSendWA = false;
+        var shouldSendReminder = false;
 
         if (daysDiff < 0) {
           // Overdue / Late
           newStatus = 'merah';
-          // Update bill status in tagihan to 'terlambat'
+          shouldSendReminder = true; // DITAMBAHKAN: Agar Email tetap dikirim setiap hari saat menunggak
+
           if (bill.status !== 'terlambat') {
             Tagihan.updateStatus(bill.id_tagihan, 'terlambat', function(err) {
               if (err) console.error('Failed to update bill status to terlambat:', err.message);
             });
           }
-        } else if (daysDiff >= 1 && daysDiff <= 3) {
-          // Due in 1 to 3 days
+        } else if (daysDiff >= 0 && daysDiff <= 3) {
+          // Due in 0 to 3 days (diperbaiki agar hari-H atau 0 hari juga terdeteksi)
           newStatus = 'kuning';
-          shouldSendWA = true;
+          shouldSendReminder = true;
         } else {
           // Far from due date
           newStatus = 'hijau';
@@ -74,7 +74,6 @@ var CronService = {
               console.error(`[Cron Service] Failed to update customer ${idPelanggan} status:`, updateErr.message);
             } else {
               console.log(`[Cron Service] Updated customer ${idPelanggan} billing status to ${targetStatus}`);
-              // Broadcast via WebSocket
               SocketService.broadcast('pelanggan_updated', {
                 id_pelanggan: idPelanggan,
                 status_tagihan: targetStatus
@@ -83,9 +82,10 @@ var CronService = {
           });
         }
 
-        // 2. Send WhatsApp Reminder if status is kuning and not sent today
-        if (shouldSendWA) {
-          await this.processWAReminder(bill);
+        // 2. Send Email Reminder if shouldSendReminder is true
+        if (shouldSendReminder) {
+          // Mengirimkan data daysDiff agar pesan email bisa dibedakan
+          await this.processEmailReminder(bill, daysDiff);
         }
       }
       
@@ -93,10 +93,10 @@ var CronService = {
     });
   },
 
-  processWAReminder: async function(bill) {
+  processEmailReminder: async function(bill, daysDiff) {
     var idPelanggan = bill.id_pelanggan;
     var name = bill.nama;
-    var phone = bill.no_hp;
+    var email = bill.email;
     var nominal = Number(bill.nominal).toLocaleString('id-ID');
     var dueDateString = new Date(bill.due_date).toLocaleDateString('id-ID', {
       day: 'numeric',
@@ -104,10 +104,16 @@ var CronService = {
       year: 'numeric'
     });
     var periode = bill.periode;
-    var paymentUrl = `${process.env.PAYMENT_PORTAL_URL || 'http://localhost:3001/bayar'}/${phone}`;
+    var paymentUrl = `${process.env.PAYMENT_PORTAL_URL || 'http://localhost:3001/bayar'}`;
 
-    // Check if reminder was already sent today to prevent duplicates
+    // Check if customer has email
+    if (!email) {
+      console.log(`[Cron Service] Pelanggan ${name} tidak memiliki email. Skipping reminder.`);
+      return;
+    }
+
     return new Promise((resolve) => {
+      // Fungsi ini akan mengecek tabel reminder_log
       ReminderLog.hasBeenSentToday(idPelanggan, async (err, alreadySent) => {
         if (err) {
           console.error('[Cron Service] DB check failed for reminder log:', err.message);
@@ -115,24 +121,36 @@ var CronService = {
           return;
         }
 
+        // Mencegah spam jika cron tereksekusi 2x di hari yang sama
         if (alreadySent) {
-          console.log(`[Cron Service] Reminder already sent today to ${name} (${phone}). Skipping.`);
+          console.log(`[Cron Service] Reminder already sent today to ${name} (${email}). Skipping.`);
           resolve();
           return;
         }
 
-        // Construct message
-        var message = `Halo ${name},\n\n` +
-          `Ini adalah pengingat otomatis dari ESP Lintas Data Multimedia.\n` +
-          `Tagihan internet Anda untuk periode ${periode} sebesar Rp ${nominal} akan jatuh tempo pada tanggal *${dueDateString}*.\n\n` +
-          `Silakan lakukan pembayaran dan konfirmasi melalui link berikut:\n` +
-          `${paymentUrl}\n\n` +
-          `Abaikan pesan ini jika Anda sudah melakukan pembayaran. Terima kasih.`;
+        // Menyusun isi pesan secara dinamis (untuk logging)
+        var message = `Halo ${name},\n\nIni adalah pesan otomatis dari ESP Lintas Data Multimedia.\n\n`;
 
-        // Send via Fonnte API
-        var result = await WhatsAppService.sendWhatsApp(phone, message);
+        if (daysDiff < 0) {
+            message += `🚨 *PEMBERITAHUAN TUNGGAKAN* 🚨\nTagihan internet Anda untuk periode ${periode} sebesar *Rp ${nominal}* TELAH LEWAT JATUH TEMPO pada tanggal ${dueDateString}.\n\nMohon segera lakukan pembayaran agar koneksi internet Anda tidak terputus secara otomatis.\n\n`;
+        } else if (daysDiff === 0) {
+            message += `⚠️ *JATUH TEMPO HARI INI* ⚠️\nTagihan internet Anda untuk periode ${periode} sebesar *Rp ${nominal}* telah jatuh tempo pada hari ini (${dueDateString}).\n\n`;
+        } else {
+            message += `Tagihan internet Anda untuk periode ${periode} sebesar *Rp ${nominal}* akan jatuh tempo dalam *${daysDiff} hari* (${dueDateString}).\n\n`;
+        }
 
-        // Record in reminder_log
+        message += `Silakan lakukan pembayaran dan konfirmasi melalui portal kami:\n${paymentUrl}\n\nAbaikan pesan ini jika Anda sudah melakukan pembayaran. Terima kasih.`;
+
+        // Send via Email
+        var result = await EmailService.sendReminderEmail(email, {
+          nama: name,
+          periode: periode,
+          nominal: nominal,
+          dueDateString: dueDateString,
+          paymentUrl: paymentUrl
+        });
+
+        // Record in reminder_log dengan datetime (Terkirim masuk database)
         ReminderLog.create({
           id_pelanggan: idPelanggan,
           status_kirim: result.success ? 'terkirim' : 'gagal',

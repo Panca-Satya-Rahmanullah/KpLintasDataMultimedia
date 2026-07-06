@@ -16,6 +16,7 @@ function PelangganPage({ socket }) {
     nama: '',
     alamat: '',
     no_hp: '',
+    email: '',
     paket: '',
     pppoe_username: '',
     due_date: ''
@@ -88,12 +89,12 @@ function PelangganPage({ socket }) {
 
   function openAddModal() {
     setFormData({
-      nama: '', alamat: '', no_hp: '', paket: '', pppoe_username: '', due_date: ''
+      nama: '', alamat: '', no_hp: '', email: '', paket: '', pppoe_username: '', due_date: ''
     });
     setFormError('');
     setEditMode(false);
     setEditId(null);
-    fetchPppoeSecrets(); // reload secrets on modal open
+    fetchPppoeSecrets();
     setShowModal(true);
   }
 
@@ -102,6 +103,7 @@ function PelangganPage({ socket }) {
       nama: item.nama || '',
       alamat: item.alamat || '',
       no_hp: item.no_hp || '',
+      email: item.email || '',
       paket: item.paket || '',
       pppoe_username: item.pppoe_username || '',
       due_date: item.due_date ? item.due_date.split('T')[0] : ''
@@ -109,7 +111,7 @@ function PelangganPage({ socket }) {
     setFormError('');
     setEditMode(true);
     setEditId(item.id_pelanggan);
-    fetchPppoeSecrets(); // reload secrets on modal open
+    fetchPppoeSecrets();
     setShowModal(true);
   }
 
@@ -150,13 +152,13 @@ function PelangganPage({ socket }) {
     }
   }
 
-  // Filter pelanggan berdasarkan search
   var filteredPelanggan = pelanggan.filter(function(item) {
     if (!searchQuery) return true;
     var q = searchQuery.toLowerCase();
     return (
       (item.nama && item.nama.toLowerCase().includes(q)) ||
       (item.no_hp && item.no_hp.includes(q)) ||
+      (item.email && item.email.toLowerCase().includes(q)) ||
       (item.pppoe_username && item.pppoe_username.toLowerCase().includes(q)) ||
       (item.paket && item.paket.toLowerCase().includes(q))
     );
@@ -166,6 +168,37 @@ function PelangganPage({ socket }) {
     if (!dateStr) return '-';
     var d = new Date(dateStr);
     return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  // FUNGSI BARU: Penentu Status Dinamis
+  function hitungStatusDinamis(dueDate, pppoeStatus) {
+    // 1. Cek jika internet mati / PPPoE offline (menimpa semua status tanggal)
+    if (pppoeStatus === 'inactive' || pppoeStatus === 'offline' || pppoeStatus === false) {
+      return 'abu_abu';
+    }
+
+    if (!dueDate) return 'abu_abu'; // Jika belum diset tanggalnya
+
+    // 2. Ambil tanggal hari ini, set jam ke 00:00 agar hitungan murni beda hari
+    var hariIni = new Date();
+    hariIni.setHours(0, 0, 0, 0);
+
+    // 3. Ambil tanggal jatuh tempo
+    var tanggalJT = new Date(dueDate);
+    tanggalJT.setHours(0, 0, 0, 0);
+
+    // 4. Hitung selisih
+    var selisihWaktu = tanggalJT.getTime() - hariIni.getTime();
+    var selisihHari = Math.ceil(selisihWaktu / (1000 * 60 * 60 * 24));
+
+    // 5. Kembalikan key yang sesuai dengan data di StatusBadge.js
+    if (selisihHari < 0) {
+      return 'merah';      // Sudah lewat jatuh tempo
+    } else if (selisihHari >= 0 && selisihHari <= 3) {
+      return 'kuning';     // H-3 sampai hari H
+    } else {
+      return 'hijau';      // Masih di atas 3 hari (Aman/Lunas)
+    }
   }
 
   return (
@@ -223,7 +256,7 @@ function PelangganPage({ socket }) {
               <tr>
                 <th>No</th>
                 <th>Nama</th>
-                <th>No HP</th>
+                <th>Kontak (HP/Email)</th>
                 <th>Paket</th>
                 <th>Harga</th>
                 <th>PPPoE Username</th>
@@ -234,6 +267,9 @@ function PelangganPage({ socket }) {
             </thead>
             <tbody>
               {filteredPelanggan.map(function(item, idx) {
+                // MEMANGGIL FUNGSI DINAMIS DI SINI
+                var statusTabel = hitungStatusDinamis(item.due_date, item.pppoe_status);
+
                 return (
                   <tr key={item.id_pelanggan}>
                     <td style={{ color: 'var(--text-muted)' }}>{idx + 1}</td>
@@ -245,7 +281,10 @@ function PelangganPage({ socket }) {
                         </div>
                       )}
                     </td>
-                    <td>{item.no_hp}</td>
+                    <td>
+                      <div>📱 {item.no_hp}</div>
+                      {item.email && <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>📧 {item.email}</div>}
+                    </td>
                     <td>{item.paket || <span style={{ color: 'var(--text-muted)' }}>-</span>}</td>
                     <td>{item.harga ? 'Rp ' + Number(item.harga).toLocaleString('id-ID') : <span style={{ color: 'var(--text-muted)' }}>-</span>}</td>
                     <td>
@@ -277,7 +316,10 @@ function PelangganPage({ socket }) {
                       )}
                     </td>
                     <td>{formatTanggal(item.due_date)}</td>
-                    <td><StatusBadge status={item.status_tagihan} /></td>
+                    
+                    {/* IMPLEMENTASI STATUS KE COMPONENT STATUS BADGE */}
+                    <td><StatusBadge status={statusTabel} /></td>
+                    
                     <td>
                       <div className="table-actions">
                         <button 
@@ -344,6 +386,16 @@ function PelangganPage({ socket }) {
               value={formData.no_hp}
               onChange={handleChange}
               required
+            />
+          </div>
+          <div className="form-group">
+            <label>Email Pelanggan</label>
+            <input
+              type="email"
+              name="email"
+              placeholder="email@example.com"
+              value={formData.email}
+              onChange={handleChange}
             />
           </div>
           <div className="form-group">
