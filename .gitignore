@@ -26,3 +26,7 @@ lerna-debug.log*
 # OS files
 .DS_Store
 Thumbs.db
+
+# Ignore file temporary Microsoft Office
+~$*.xlsx
+~$*.docx
