@@ -38,9 +38,11 @@ function LoginPage({ onLogin }) {
       <div className="login-container">
         <div className="login-card">
           <div className="login-logo">
-            <div className="login-logo-icon"><TemplateIcon name="globe" size={28} /></div>
-            <h1>ESP Lintas Data</h1>
-            <p>Dashboard Monitoring ISP</p>
+            <img
+              src={process.env.PUBLIC_URL + '/logo ldm.png'}
+              alt="Logo Lintas Data Multimedia"
+              className="login-logo-img"
+            />
           </div>
 
           {error && (

@@ -79,6 +79,19 @@
   margin-bottom: 32px;
 }
 
+.login-logo-img {
+  height: 75px;
+  max-width: 100%;
+  object-fit: contain;
+  margin-bottom: 16px;
+  filter: drop-shadow(0 4px 8px rgba(0, 104, 118, 0.15));
+  transition: transform var(--transition-normal);
+}
+
+.login-logo-img:hover {
+  transform: scale(1.05);
+}
+
 .login-logo-icon {
   width: 64px;
   height: 64px;
@@ -772,6 +785,121 @@
 .skeleton-text.lg {
   height: 20px;
   width: 60%;
+}
+
+/* ============================================
+   Financial Report Chart
+   ============================================ */
+
+.chart-container-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  padding: 24px 28px;
+  margin-bottom: 24px;
+  position: relative;
+  box-shadow: var(--shadow-sm);
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.chart-title-wrap h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chart-title-wrap p {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.chart-legend {
+  display: flex;
+  gap: 16px;
+  font-size: 0.8rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.legend-color {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.legend-color.pemasukan {
+  background-color: var(--primary);
+}
+
+.legend-color.pengeluaran {
+  background-color: var(--status-merah);
+}
+
+.chart-svg-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.chart-tooltip {
+  position: absolute;
+  background: rgba(25, 28, 29, 0.95);
+  border: 1px solid var(--border-color);
+  backdrop-filter: blur(8px);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  box-shadow: var(--shadow-md);
+  pointer-events: none;
+  z-index: 10;
+  min-width: 170px;
+  color: #fff;
+  transition: left 0.1s ease-out, top 0.1s ease-out;
+}
+
+.tooltip-month {
+  font-weight: 700;
+  font-size: 0.8rem;
+  margin-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 4px;
+  color: #f8fafc;
+}
+
+.tooltip-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  margin-bottom: 4px;
+}
+
+.tooltip-row:last-child {
+  margin-bottom: 0;
+}
+
+.tooltip-val {
+  font-weight: 700;
+}
+
+.reports-tables-grid {
+  grid-template-columns: 1fr;
 }
 
 /* ============================================

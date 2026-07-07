@@ -62,7 +62,11 @@ function CustomerLoginPage({ onLogin }) {
       <div className="login-container">
         <div className="login-card">
           <div className="login-logo">
-            <div className="login-logo-icon"><TemplateIcon name="key" size={28} /></div>
+            <img
+              src={process.env.PUBLIC_URL + '/logo ldm.png'}
+              alt="Logo Lintas Data Multimedia"
+              className="login-logo-img"
+            />
             <h1>Portal Pembayaran</h1>
             <p>ESP Lintas Data Multimedia</p>
           </div>
