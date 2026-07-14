@@ -306,7 +306,7 @@ function PelangganPage({ socket }) {
                           <code style={{
                             background: 'var(--bg-tertiary)',
                             padding: '2px 8px',
-                            borderRadius: '4px',
+                             borderRadius: '5px',
                             fontSize: '0.8rem',
                             color: item.pppoe_status === 'active' ? 'var(--text-primary)' : 'var(--text-secondary)'
                           }}>

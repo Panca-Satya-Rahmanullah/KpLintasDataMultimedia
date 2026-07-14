@@ -217,13 +217,13 @@ function CustomerPortalPage({ onLogout }) {
       };
     },
     optionLogo: {
-      width: 28, height: 28, objectFit: 'contain', borderRadius: 4,
+      width: 28, height: 28, objectFit: 'contain', borderRadius: 5,
       background: 'none', padding: 0, border: 'none',
       flexShrink: 0
     },
     optionIcon: {
       width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'var(--md-primary-fixed)', borderRadius: 4, flexShrink: 0,
+      background: 'var(--md-primary-fixed)', borderRadius: 5, flexShrink: 0,
       color: 'var(--md-primary)'
     },
     optionText: { flex: 1 },
