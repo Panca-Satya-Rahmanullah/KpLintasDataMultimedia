@@ -146,7 +146,7 @@ function MikrotikPage({ socket }) {
                             background: 'var(--status-merah-bg)',
                             color: 'var(--status-merah)',
                             padding: '2px 8px',
-                            borderRadius: '4px',
+                            borderRadius: '5px',
                             fontWeight: 600,
                             fontSize: '0.85rem'
                           }}>

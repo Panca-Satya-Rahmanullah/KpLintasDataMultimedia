@@ -199,19 +199,19 @@ function App() {
       {/* Customer Login */}
       <Route path="/bayar/:userEmail" element={
         customer && customerToken
-          ? <Navigate to="/portal" replace />
+          ? <Navigate to="/" replace />
           : <CustomerLoginPage onLogin={handleCustomerLogin} title="Portal Pembayaran" />
       } />
       <Route path="/bayar" element={
         customer && customerToken
-          ? <Navigate to="/portal" replace />
+          ? <Navigate to="/" replace />
           : <CustomerLoginPage onLogin={handleCustomerLogin} title="Portal Pembayaran" />
       } />
 
       {/* Customer Login Pelanggan */}
       <Route path="/login" element={
         customer && customerToken
-          ? <Navigate to="/portal" replace />
+          ? <Navigate to="/" replace />
           : <CustomerLoginPage onLogin={handleCustomerLogin} title="Portal Login" />
       } />
 

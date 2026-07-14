@@ -175,7 +175,7 @@ function PembayaranPage({ socket }) {
                     <td style={{ color: 'var(--text-muted)' }}>{idx + 1}</td>
                     <td style={{ fontWeight: 600 }}>{item.nama}</td>
                     <td>{item.no_hp}</td>
-                    <td><code style={{ background: 'var(--bg-tertiary)', padding: '2px 6px', borderRadius: '4px' }}>{item.periode}</code></td>
+                    <td><code style={{ background: 'var(--bg-tertiary)', padding: '2px 6px', borderRadius: '5px' }}>{item.periode}</code></td>
                     <td style={{ fontWeight: 700, color: 'var(--primary-light)' }}>
                       Rp {Number(item.nominal).toLocaleString('id-ID')}
                     </td>

@@ -111,12 +111,12 @@
   --shadow-glow: 0 0 18px rgba(0, 104, 118, 0.12);
 
   /* Radius — from code.html */
-  --radius-sm: 0.25rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
-  --radius-2xl: 1.5rem;
-  --radius-full: 9999px;
+  --radius-sm: 5px;
+  --radius-md: 5px;
+  --radius-lg: 5px;
+  --radius-xl: 5px;
+  --radius-2xl: 5px;
+  --radius-full: 5px;
 
   /* Spacing — from code.html */
   --stack-sm: 8px;

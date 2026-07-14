@@ -8,6 +8,8 @@ function LandingPage({ customer, onLogout }) {
   var navigate = useNavigate();
   var isLoggedIn = !!customer;
   var [openFaq, setOpenFaq] = useState(0);
+  var [showLoginPopup, setShowLoginPopup] = useState(false);
+  var [isAtTop, setIsAtTop] = useState(true);
 
   var [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -43,7 +45,7 @@ function LandingPage({ customer, onLogout }) {
 
     sections.forEach(function (section) { observer.observe(section); });
 
-    // Navbar scroll shadow
+    // Navbar scroll shadow + track position
     function handleScroll() {
       var nav = document.querySelector('.landing-nav');
       if (nav) {
@@ -53,6 +55,7 @@ function LandingPage({ customer, onLogout }) {
           nav.classList.remove('scrolled');
         }
       }
+      setIsAtTop(window.scrollY < 100);
     }
     window.addEventListener('scroll', handleScroll);
 
@@ -66,7 +69,7 @@ function LandingPage({ customer, onLogout }) {
     if (isLoggedIn) {
       navigate('/portal');
     } else {
-      navigate('/bayar');
+      setShowLoginPopup(true);
     }
   }
 
@@ -139,8 +142,19 @@ function LandingPage({ customer, onLogout }) {
     fetchPackages();
   }, []);
 
-  function scrollToTop() {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  function handleScrollToggle() {
+    if (isAtTop) {
+      // Gulir ke bawah — ke section pertama setelah hero
+      var target = document.getElementById('layanan');
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
+      }
+    } else {
+      // Gulir ke atas
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }
 
   return (
@@ -166,18 +180,13 @@ function LandingPage({ customer, onLogout }) {
                     <span className="material-symbols-outlined" style={{ fontSize: 18 }}>person</span> {customer.nama}
                   </span>
                 )}
-                <button className="landing-btn-outline" onClick={function () { navigate('/portal'); }}>
-                  <span className="material-symbols-outlined" style={{ fontSize: 16 }}>dashboard</span> {isMobile ? 'Portal' : 'Portal Saya'}
+                <button className="landing-btn-outline landing-btn-outline--muted" onClick={onLogout}>
+                  <span className="material-symbols-outlined" style={{ fontSize: 16 }}>logout</span> {isMobile ? 'Keluar' : 'Keluar'}
                 </button>
-                {!isMobile && (
-                  <button className="landing-btn-outline landing-btn-outline--muted" onClick={onLogout}>
-                    <span className="material-symbols-outlined" style={{ fontSize: 16 }}>logout</span> Keluar
-                  </button>
-                )}
               </>
             ) : (
-              <button className="landing-btn-primary" onClick={function () { window.open('https://wa.me/6282299139449?text=Halo%2C%20saya%20ingin%20pesan%20layanan%20internet%20dari%20Lintas%20Data%20Multimedia.', '_blank'); }}>
-                <span className="material-symbols-outlined">call</span> {isMobile ? 'Daftar' : 'Daftar Sekarang'}
+              <button className="landing-btn-primary" onClick={function () { navigate('/bayar'); }}>
+                <span className="material-symbols-outlined">login</span> {isMobile ? 'Login' : 'Login Pelanggan'}
               </button>
             )}
           </div>
@@ -273,7 +282,7 @@ function LandingPage({ customer, onLogout }) {
             margin: showSpline ? '0' : '20px auto 0',
             display: 'block'
           }}>
-            <HeroSplineScene logoCoverColor="#f8f9fa" />
+            <HeroSplineScene logoCoverColor="linear-gradient(to bottom, #fafbfc, #fbfcfd)" />
           </div>
         </div>
       </section>
@@ -356,29 +365,39 @@ function LandingPage({ customer, onLogout }) {
         </div>
       </section>
 
-      {/* CTA Bayar Tagihan */}
-      <section className="landing-cta reveal-on-scroll">
+      {/* CTA Daftar Sekarang */}
+      <section className="landing-cta reveal-on-scroll" id="daftar">
         <div className="landing-cta-inner">
           <div className="landing-cta-content">
-            <h2>Bayar Tagihan Anda Sekarang</h2>
-            <p>Login ke portal pelanggan untuk melihat status tagihan dan melakukan pembayaran secara instan. Pembayaran otomatis diverifikasi dan internet langsung aktif kembali.</p>
-            <button className="landing-btn-primary landing-btn-lg" onClick={handleLoginClick}>
-              <span className="material-symbols-outlined">payments</span> {isLoggedIn ? 'Buka Portal Pembayaran' : 'Login Pelanggan'}
-            </button>
+            <h2>Daftar Sekarang</h2>
+            <p>Bergabunglah dengan ratusan pelanggan puas Lintas Data Multimedia. Nikmati internet cepat tanpa batas dengan harga terjangkau dan instalasi gratis. Hubungi kami via WhatsApp untuk proses pendaftaran yang mudah dan cepat.</p>
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+              <a
+                href="https://wa.me/6282299139449?text=Halo%2C%20saya%20ingin%20mendaftar%20layanan%20internet%20dari%20Lintas%20Data%20Multimedia."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="landing-btn-primary landing-btn-lg"
+              >
+                <span className="material-symbols-outlined">chat</span> Daftar via WhatsApp
+              </a>
+              <a href="#kontak" className="landing-btn-ghost landing-btn-lg">
+                <span className="material-symbols-outlined">info</span> Pelajari Lebih Lanjut
+              </a>
+            </div>
           </div>
           <div className="landing-cta-visual">
             <div className="landing-cta-card">
               <div className="landing-cta-card-row">
-                <span className="landing-cta-card-label">Status</span>
-                <span className="landing-cta-card-badge--green">Lunas</span>
+                <span className="landing-cta-card-label">Instalasi</span>
+                <span className="landing-cta-card-badge--green">Gratis</span>
               </div>
               <div className="landing-cta-card-row">
-                <span className="landing-cta-card-label">Periode</span>
-                <span className="landing-cta-card-value">Juli 2026</span>
+                <span className="landing-cta-card-label">Kecepatan</span>
+                <span className="landing-cta-card-value">Hingga 100 Mbps</span>
               </div>
               <div className="landing-cta-card-row">
-                <span className="landing-cta-card-label">Nominal</span>
-                <span className="landing-cta-card-value landing-cta-card-value--bold">Rp 200.000</span>
+                <span className="landing-cta-card-label">Mulai Dari</span>
+                <span className="landing-cta-card-value landing-cta-card-value--bold">Rp 150.000/bln</span>
               </div>
             </div>
           </div>
@@ -436,7 +455,7 @@ function LandingPage({ customer, onLogout }) {
             <iframe
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d297!2d104.9778103!3d-5.3431389!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e47332d89a55f43:0x6d7f59cfb822556e!2sPT+Lintas+Data+Multimedia!5e0!3m2!1sen!2sid!4v1695897600000!5m2!1sen!2sid"
               title="Lokasi PT Lintas Data Multimedia"
-              style={{ border: 0, width: '100%', height: '300px', borderRadius: '12px' }}
+              style={{ border: 0, width: '100%', height: '300px', borderRadius: '5px' }}
               allowFullScreen
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
@@ -475,9 +494,10 @@ function LandingPage({ customer, onLogout }) {
         </div>
       </footer>
 
-      {/* Back to Top Button */}
+      {/* Scroll Toggle Button (atas / bawah) */}
       <button
-        onClick={scrollToTop}
+        onClick={handleScrollToggle}
+        title={isAtTop ? 'Gulir ke bawah' : 'Gulir ke atas'}
         style={{
           position: 'fixed', bottom: 32, right: 32, width: 56, height: 56,
           background: 'var(--md-primary)', color: 'white', borderRadius: '50%',
@@ -485,11 +505,72 @@ function LandingPage({ customer, onLogout }) {
           boxShadow: '0 8px 24px rgba(0,104,118,0.3)', cursor: 'pointer',
           transition: 'all 0.3s ease', zIndex: 40
         }}
-        onMouseEnter={function (e) { e.target.style.transform = 'translateY(-4px)'; }}
-        onMouseLeave={function (e) { e.target.style.transform = 'translateY(0)'; }}
+        onMouseEnter={function (e) { e.currentTarget.style.transform = 'translateY(-4px) scale(1.05)'; }}
+        onMouseLeave={function (e) { e.currentTarget.style.transform = 'translateY(0) scale(1)'; }}
       >
-        <span className="material-symbols-outlined">arrow_upward</span>
+        <span
+          className="material-symbols-outlined"
+          style={{ transition: 'transform 0.3s ease', display: 'block', transform: isAtTop ? 'rotate(180deg)' : 'rotate(0deg)' }}
+        >
+          arrow_upward
+        </span>
       </button>
+      {/* Popup: Login Required */}
+      {showLoginPopup && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 9999,
+          background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: '20px'
+        }} onClick={function () { setShowLoginPopup(false); }}>
+          <div style={{
+            background: '#fff', borderRadius: '5px',
+            padding: '32px 28px', maxWidth: '400px', width: '100%',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
+            textAlign: 'center', animation: 'slideUp 0.25s ease-out'
+          }} onClick={function (e) { e.stopPropagation(); }}>
+            <div style={{
+              width: 56, height: 56,
+              background: 'rgba(0,104,118,0.1)',
+              borderRadius: '50%',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              margin: '0 auto 16px'
+            }}>
+              <span className="material-symbols-outlined" style={{ fontSize: 28, color: 'var(--md-primary)' }}>lock</span>
+            </div>
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#1a202c', marginBottom: 8 }}>Anda Belum Login</h3>
+            <p style={{ fontSize: '0.88rem', color: '#64748b', lineHeight: 1.6, marginBottom: 24 }}>
+              Silakan login terlebih dahulu untuk mengakses portal pembayaran dan melihat status tagihan Anda.
+            </p>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+              <button
+                style={{
+                  padding: '10px 20px', borderRadius: '5px',
+                  border: '1.5px solid #cbd5e1', background: 'transparent',
+                  color: '#64748b', fontWeight: 600, fontSize: '0.88rem', cursor: 'pointer',
+                  fontFamily: "'Open Sans', sans-serif"
+                }}
+                onClick={function () { setShowLoginPopup(false); }}
+              >
+                Batal
+              </button>
+              <button
+                style={{
+                  padding: '10px 20px', borderRadius: '5px',
+                  border: 'none', background: 'var(--md-primary)',
+                  color: 'white', fontWeight: 700, fontSize: '0.88rem', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  fontFamily: "'Open Sans', sans-serif"
+                }}
+                onClick={function () { setShowLoginPopup(false); navigate('/bayar'); }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: 16 }}>login</span>
+                Login Sekarang
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

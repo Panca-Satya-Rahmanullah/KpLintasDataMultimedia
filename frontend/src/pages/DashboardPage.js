@@ -270,7 +270,7 @@ function DashboardPage({ socket }) {
           align-items: center;
           gap: 8px;
           padding: 6px 10px;
-          border-radius: 999px;
+          border-radius: 5px;
           background: var(--primary-glow);
           color: var(--primary);
           font-size: 0.74rem;
@@ -384,7 +384,7 @@ function DashboardPage({ socket }) {
           align-items: center;
           gap: 6px;
           padding: 6px 10px;
-          border-radius: 999px;
+          border-radius: 5px;
           font-size: 0.75rem;
           font-weight: 700;
           white-space: nowrap;
@@ -697,7 +697,7 @@ function DashboardPage({ socket }) {
           background: #ffffff;
           border: 1px solid #cbd5e1;
           padding: 1px 4px;
-          border-radius: 2px;
+          border-radius: 5px;
           margin-top: 3px;
           box-shadow: 0 1px 2px rgba(0,0,0,0.04);
         }
