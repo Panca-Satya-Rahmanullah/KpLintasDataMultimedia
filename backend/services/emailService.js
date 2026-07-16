@@ -1,5 +1,8 @@
 var nodemailer = require('nodemailer');
 
+// Publicly hosted logo URL on raw GitHub to ensure it renders instantly and reliably in Gmail
+var LOGO_URL = 'https://raw.githubusercontent.com/L-yall/KpLintasDataMultimedia/main/backend/public/logo_ldm.png';
+
 // Create reusable transporter using Gmail SMTP if credentials are configured
 var transporter = null;
 
@@ -70,7 +73,7 @@ var EmailService = {
   sendOtpEmail: async function (toEmail, data) {
     var subject = 'Kode OTP Login - ESP Lintas Data Multimedia';
     var appUrl = process.env.APP_URL || 'http://localhost:3000';
-    var logoUrl = appUrl + '/logo_ldm.png';
+    var logoUrl = LOGO_URL;
     var html = `
 <!DOCTYPE html>
 <html lang="id">
@@ -92,8 +95,10 @@ var EmailService = {
         <!-- Logo -->
         <table role="presentation" width="440" cellpadding="0" cellspacing="0" border="0" style="max-width: 440px; width: 100%;">
           <tr>
-            <td align="center" style="padding-bottom: 16px;">
-              <img src="${logoUrl}" alt="PT. Lintas Data Multimedia" width="140" style="display: block; height: auto; max-width: 140px; border: 0;">
+            <td align="center" style="padding-bottom: 0px;">
+              <a href="https://lintasdata.net.id" target="_blank" style="text-decoration: none; border: 0; outline: none; display: block; width: 250px; margin: 0 auto; cursor: default;">
+                <img src="${logoUrl}" alt="PT. Lintas Data Multimedia" width="250" style="display: block; margin: 0 auto; height: auto; max-width: 250px; border: 0;">
+              </a>
             </td>
           </tr>
           <tr>
@@ -139,7 +144,7 @@ var EmailService = {
   </table>
 </body>
 </html>
-    `;
+     `;
     return await this.sendEmail(toEmail, subject, html);
   },
 
@@ -148,7 +153,7 @@ var EmailService = {
    */
   sendReminderEmail: async function (toEmail, data) {
     var appUrl = process.env.APP_URL || 'http://localhost:3000';
-    var logoUrl = appUrl + '/logo_ldm.png';
+    var logoUrl = LOGO_URL;
 
     // Dynamic content based on daysDiff
     var daysDiff = data.daysDiff !== undefined ? data.daysDiff : 1;
@@ -202,7 +207,9 @@ var EmailService = {
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                 <tr>
                   <td align="left" valign="middle">
-                    <img src="${logoUrl}" alt="PT. Lintas Data Multimedia" width="120" style="display: block; height: auto; max-width: 120px; border: 0;">
+                    <a href="https://lintasdata.net.id" target="_blank" style="text-decoration: none; border: 0; outline: none; display: block; width: 120px; cursor: default;">
+                      <img src="${logoUrl}" alt="PT. Lintas Data Multimedia" width="120" style="display: block; height: auto; max-width: 120px; border: 0;">
+                    </a>
                   </td>
                   <td align="right" valign="middle">
                     <p style="margin: 0; font-size: 12px; font-weight: 600; color: #3f4850; letter-spacing: 0.05em; text-transform: uppercase;">Portal Pelanggan</p>
@@ -405,9 +412,9 @@ var EmailService = {
    */
   sendPaymentApprovedEmail: async function (toEmail, data) {
     var appUrl = process.env.APP_URL || 'http://localhost:3000';
-    var logoUrl = appUrl + '/logo_ldm.png';
+    var logoUrl = LOGO_URL;
     var subject = '✅ Pembayaran Disetujui - Periode ' + data.periode;
-    
+
     var html = `
 <!DOCTYPE html>
 <html lang="id">
@@ -428,7 +435,9 @@ var EmailService = {
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                 <tr>
                   <td align="left" valign="middle">
-                    <img src="${logoUrl}" alt="PT. Lintas Data Multimedia" width="120" style="display: block; height: auto; max-width: 120px; border: 0;">
+                    <a href="https://lintasdata.net.id" target="_blank" style="text-decoration: none; border: 0; outline: none; display: block; width: 120px; cursor: default;">
+                      <img src="${logoUrl}" alt="PT. Lintas Data Multimedia" width="120" style="display: block; height: auto; max-width: 120px; border: 0;">
+                    </a>
                   </td>
                   <td align="right" valign="middle">
                     <p style="margin: 0; font-size: 12px; font-weight: 600; color: #3f4850; letter-spacing: 0.05em; text-transform: uppercase;">Portal Pelanggan</p>
@@ -532,9 +541,9 @@ var EmailService = {
    */
   sendPaymentRejectedEmail: async function (toEmail, data) {
     var appUrl = process.env.APP_URL || 'http://localhost:3000';
-    var logoUrl = appUrl + '/logo_ldm.png';
+    var logoUrl = LOGO_URL;
     var subject = '❌ Pembayaran Ditolak - Periode ' + data.periode;
-    
+
     var html = `
 <!DOCTYPE html>
 <html lang="id">
@@ -555,7 +564,9 @@ var EmailService = {
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                 <tr>
                   <td align="left" valign="middle">
-                    <img src="${logoUrl}" alt="PT. Lintas Data Multimedia" width="120" style="display: block; height: auto; max-width: 120px; border: 0;">
+                    <a href="https://lintasdata.net.id" target="_blank" style="text-decoration: none; border: 0; outline: none; display: block; width: 120px; cursor: default;">
+                      <img src="${logoUrl}" alt="PT. Lintas Data Multimedia" width="120" style="display: block; height: auto; max-width: 120px; border: 0;">
+                    </a>
                   </td>
                   <td align="right" valign="middle">
                     <p style="margin: 0; font-size: 12px; font-weight: 600; color: #3f4850; letter-spacing: 0.05em; text-transform: uppercase;">Portal Pelanggan</p>
