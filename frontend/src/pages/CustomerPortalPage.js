@@ -323,7 +323,7 @@ function CustomerPortalPage({ onLogout }) {
         return (
           <div style={S.infoBox}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, marginBottom: 10 }}>
-              <img src={process.env.PUBLIC_URL + '/logo_bri.png'} alt="Bank BRI" style={{ height: 32, objectFit: 'contain' }} />
+              <img src={process.env.PUBLIC_URL + '/BRI.jpg'} alt="Bank BRI" style={{ height: 32, objectFit: 'contain' }} />
               <div style={{ fontSize: '0.78rem', color: 'var(--md-outline)', textTransform: 'uppercase', fontWeight: 600 }}>Transfer Bank BRI</div>
             </div>
             <div style={{ fontSize: '1.15rem', fontWeight: 800, margin: '4px 0', color: 'var(--md-primary)' }}>0346-01-001962-50-8</div>
@@ -334,7 +334,7 @@ function CustomerPortalPage({ onLogout }) {
         return (
           <div style={S.infoBox}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, marginBottom: 10 }}>
-              <img src={process.env.PUBLIC_URL + '/logo_mandiri.png'} alt="Bank Mandiri" style={{ height: 32, objectFit: 'contain' }} />
+              <img src={process.env.PUBLIC_URL + '/MANDIRI.png'} alt="Bank Mandiri" style={{ height: 32, objectFit: 'contain' }} />
               <div style={{ fontSize: '0.78rem', color: 'var(--md-outline)', textTransform: 'uppercase', fontWeight: 600 }}>Transfer Bank Mandiri</div>
             </div>
             <div style={{ fontSize: '1.15rem', fontWeight: 800, margin: '4px 0', color: 'var(--md-primary)' }}>131-00-1572912-3</div>
@@ -345,7 +345,7 @@ function CustomerPortalPage({ onLogout }) {
         return (
           <div style={S.infoBox}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, marginBottom: 10 }}>
-              <img src={process.env.PUBLIC_URL + '/logo_bca.png'} alt="Bank BCA" style={{ height: 32, objectFit: 'contain' }} />
+              <img src={process.env.PUBLIC_URL + '/BCA.png'} alt="Bank BCA" style={{ height: 32, objectFit: 'contain' }} />
               <div style={{ fontSize: '0.78rem', color: 'var(--md-outline)', textTransform: 'uppercase', fontWeight: 600 }}>Transfer Bank BCA</div>
             </div>
             <div style={{ fontSize: '1.15rem', fontWeight: 800, margin: '4px 0', color: 'var(--md-primary)' }}>869-0577-888</div>
